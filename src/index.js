@@ -1,46 +1,61 @@
 const express = require("express");
+const { uuid } = require("uuidv4");
 const app = express();
 
 app.use(express.json());
 
-app.get("/projeto", (req, res) => {
-    const {title, dev} = req.query;
-    console.log(title);
-    console.log(dev);
+const projects = [];
 
-    return res.json([
-        "Projeto 1",
-        "Projeto 2"
-    ]);
+app.get("/projects", (req, res) => {
+    const {title} = req.query;
+
+    const results = title 
+        ? projects.filter(project => project.title.includes(title))
+        : projects
+
+    return res.json(results);
 });
 
-app.post("/projeto", (req, res) => {
-    return res.json([
-        "Projeto 1",
-        "Projeto 2",
-        "Projeto 3"
-    ]);
+app.post("/projects", (req, res) => {
+    const {title, dev} = req.body;
+    const project = {id: uuid(), title, dev}
+
+    projects.push(project);
+
+    return res.json(project);
 });
 
-app.put("/projeto/:id", (req, res) => {
+app.put("/projects/:id", (req, res) => {
     const {id} = req.params;
-    console.log(id);
+    const {title, dev} = req.body;
+    const projectIndex = projects.findIndex(project => project.id === id);
 
-    return res.json([
-        "Projeto 4",
-        "Projeto 2",
-        "Projeto 3"
-    ]);
+    if(projectIndex < 0){
+        return res.status(400).json({error: "Projeto não encontrado"});
+    }
+
+    const project = {
+        id, 
+        title,
+        dev
+    }
+
+    projects[projectIndex] = project;
+
+    return res.json(project);
 });
 
-app.delete("/projeto:id", (req, res) => {
+app.delete("/projects:id", (req, res) => {
     const {id} = req.params;
-    console.log(id);
+    const projectIndex = projects.findIndex(project => project.id === id);
 
-    return res.json([
-        "Projeto 2",
-        "Projeto 3"
-    ]);
+    if(projectIndex < 0){
+        return res.status(400).json({error: "Projeto não encontrado"});
+    }
+
+    projects.splice(projectIndex, 1);
+
+    return res.status(204).send();
 });
 
 app.listen(3333, () => {
