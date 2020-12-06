@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import { StyleSheet, Text, View, StatusBar, FlatList } from 'react-native';
+import { StyleSheet, Text, View, StatusBar, FlatList, TouchableOpacity } from 'react-native';
 import api from "./src/services/api";
 
 export default function App() {
@@ -13,6 +13,18 @@ export default function App() {
     })
   }, []);
 
+  async function handleAddProject(){
+    const res = await api.post('projects', {
+      title: `New ${Date.now()}`,
+      dev: 'Dev test'
+    })
+    
+    const project = res.data;
+    setProjects([...projects, project]);
+
+  };
+
+
   return (
     <>
       <StatusBar barStyle='dark-content' backgroundColor="#0c94ac" />
@@ -21,17 +33,6 @@ export default function App() {
         <Text style={styles.description}>Developers In Development</Text>
 
         <Text style={styles.titleProjects}>Projetos:</Text>
-
-        <FlatList 
-          style={styles.projectList}
-          data={projects}
-          keyExtractor={(project) => project.id}
-          renderItem={({item: project}) => (
-            <Text style={styles.project} key={project.id}>
-                {project.title}
-            </Text>
-          )}
-        />
 
         {/*<View style={styles.projects}>
             <Text style={styles.titleProjects}>
@@ -44,7 +45,26 @@ export default function App() {
             ))}
           </View>*/}
 
-    </View>
+
+        <FlatList 
+          style={styles.projectList}
+          data={projects}
+          keyExtractor={(project) => project.id}
+          renderItem={({item: project}) => (
+            <Text style={styles.project} key={project.id}>
+                {project.title}
+            </Text>
+          )}
+        />
+
+        <TouchableOpacity activeOpacity={0.8} style={styles.button} onPress={handleAddProject}>
+          <Text style={styles.buttonText}>
+            Adicionar Projeto
+          </Text>
+        </TouchableOpacity>
+
+
+      </View>
     </>
   );
 }
@@ -79,5 +99,20 @@ const styles = StyleSheet.create({
   project: {
     color: '#fff',
     fontSize: 20,
+  },
+  button: {
+    alignSelf: "stretch",
+    backgroundColor: '#0c94ac',
+    margin: 20,
+    height: 50,
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: "center",
+    marginBottom: 40,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
   },
 });
